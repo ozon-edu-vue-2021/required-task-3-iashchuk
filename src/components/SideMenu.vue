@@ -92,6 +92,11 @@ export default {
   mounted() {
     this.makeChart();
   },
+  updated() {
+    if (!this.isUserOpenned) {
+      this.makeChart();
+    }
+  },
   methods: {
     closeProfile() {
       this.$emit("update:isUserOpenned", false);
