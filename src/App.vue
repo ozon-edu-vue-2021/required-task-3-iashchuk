@@ -4,8 +4,8 @@
       <Map
         :tables="tablesWithGroupColor"
         :selectedTable="selectedTable"
-        @update:isUserOpenned="isUserOpenned = $event"
-        @onSelectTable="handleSelectTable"
+        @setUserOpenned="isUserOpenned = $event"
+        @selectTable="handleSelectTable"
       />
       <SideMenu
         :legend="legendWithCounter"
@@ -13,7 +13,7 @@
         :selectedTable="selectedTable"
         :department="selectedDepartment"
         :person="selectedTableUser"
-        @update:isUserOpenned="isUserOpenned = $event"
+        @setUserOpenned="isUserOpenned = $event"
       />
     </div>
   </div>

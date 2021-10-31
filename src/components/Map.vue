@@ -1,5 +1,5 @@
 <template>
-  <div class="map" @click="handleOutsideTableClick">
+  <div class="map" @click="handleMapClick">
     <h3>Карта офиса</h3>
     <div v-if="!isLoading" class="map-root">
       <MapSVG ref="svg" />
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import * as d3 from "d3";
+import { select as d3Select } from "d3";
 import MapSVG from "@/assets/images/map.svg";
 import TableSVG from "@/assets/images/workPlace.svg";
 
@@ -32,19 +32,14 @@ export default {
   data() {
     return {
       isLoading: false,
-      svg: null,
-      g: null,
-      tableSVG: null,
     };
   },
   mounted() {
     this.isLoading = true;
 
-    this.svg = d3.select(this.$refs.svg);
-    this.g = this.svg.select("g");
-    this.tableSVG = d3.select(this.$refs.table);
+    const g = d3Select(this.$refs?.svg).select("g");
 
-    if (this.g) {
+    if (g) {
       this.drawTables();
     } else {
       alert("SVG is incorrect");
@@ -60,25 +55,32 @@ export default {
     },
   },
   methods: {
-    handleOutsideTableClick() {
-      this.$emit("update:isUserOpenned", false);
-    },
-    handleTableClick(evt) {
-      evt.stopPropagation();
+    handleMapClick(evt) {
+      const employerPlace = evt.target.closest(".employer-place");
 
-      const tableId = Number(evt.currentTarget.getAttribute("id"));
+      if (!employerPlace) {
+        this.$emit("setUserOpenned", false);
+        return;
+      }
+
+      const tableId = Number(employerPlace.getAttribute("id"));
       const table = this.tables.find((item) => item._id === tableId);
-      this.$emit("onSelectTable", table);
-      this.$emit("update:isUserOpenned", true);
+
+      if (!table) {
+        return;
+      }
+
+      this.$emit("selectTable", table);
+      this.$emit("setUserOpenned", true);
     },
     drawSelectedTable(tableId) {
-      d3.select(`.employer-place_selected`).classed(
+      d3Select(`.employer-place_selected`).classed(
         "employer-place_selected",
         false
       );
 
       if (tableId) {
-        d3.select(`.employer-place[id="${tableId}"]`).classed(
+        d3Select(`.employer-place[id="${tableId}"]`).classed(
           "employer-place_selected",
           true
         );
@@ -86,7 +88,8 @@ export default {
     },
 
     drawTables() {
-      const svgTablesGroupPlace = this.g
+      const svgTablesGroupPlace = d3Select(this.$refs?.svg)
+        .select("g")
         .append("g")
         .classed("groupPlaces", true);
 
@@ -96,15 +99,14 @@ export default {
           .attr("transform", `translate(${table.x}, ${table.y}) scale(0.5)`)
           .attr("id", table._id)
           .classed("employer-place", true)
-          .classed("employer-place_disabled", !Number.isFinite(table.group_id))
-          .on("click", this.handleTableClick);
+          .classed("employer-place_disabled", !Number.isFinite(table.group_id));
 
         targetSeat
           .append("g")
           .attr("transform", `rotate(${table.rotate || 0})`)
           .attr("group_id", table.group_id)
           .classed("table", true)
-          .html(this.tableSVG.html())
+          .html(d3Select(this.$refs?.table).html())
           .attr("fill", table.groupColor);
       });
     },

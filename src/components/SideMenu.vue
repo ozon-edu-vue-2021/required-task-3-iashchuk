@@ -17,10 +17,10 @@
     <div class="content">
       <div v-if="!isUserOpenned" class="legend">
         <div class="legend__data">
-          <div v-if="legend.length > 0" class="legend__items">
-            <Draggable v-model="legend">
+          <div v-if="draggableLegend.length > 0" class="legend__items">
+            <Draggable v-model="draggableLegend">
               <LegendItem
-                v-for="(item, index) in legend"
+                v-for="(item, index) in draggableLegend"
                 :key="index"
                 :color="item.color"
                 :text="item.text"
@@ -83,11 +83,19 @@ export default {
       default: null,
     },
   },
+  data() {
+    return {
+      draggableLegend: [],
+    };
+  },
   components: {
     LegendItem,
     PersonCard,
     Draggable,
     PieChart,
+  },
+  created() {
+    this.draggableLegend = this.legend;
   },
   mounted() {
     this.makeChart();
@@ -99,7 +107,7 @@ export default {
   },
   methods: {
     closeProfile() {
-      this.$emit("update:isUserOpenned", false);
+      this.$emit("setUserOpenned", false);
     },
     makeChart() {
       const сhartData = {
@@ -202,7 +210,7 @@ h3 {
 }
 
 .content .legend .legend__items .legend__item {
-  cursor: pointer;
+  cursor: grabbing;
 }
 
 .content .legend .legend__items .legend__item.sortable-chosen {
