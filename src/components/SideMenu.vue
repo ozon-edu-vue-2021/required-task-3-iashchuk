@@ -60,6 +60,13 @@ import { Doughnut as PieChart } from "vue-chartjs";
 import LegendItem from "./SideMenu/LegendItem.vue";
 import PersonCard from "./SideMenu/PersonCard.vue";
 
+const CHART_OPTIONS = {
+  borderWidth: "10px",
+  legend: {
+    display: false,
+  },
+};
+
 export default {
   props: {
     legend: {
@@ -86,6 +93,7 @@ export default {
   data() {
     return {
       draggableLegend: [],
+      needRenderChart: true,
     };
   },
   components: {
@@ -101,16 +109,20 @@ export default {
     this.makeChart();
   },
   updated() {
-    if (!this.isUserOpenned) {
+    if (this.needRenderChart) {
       this.makeChart();
+      this.needRenderChart = false;
     }
   },
-  methods: {
-    closeProfile() {
-      this.$emit("setUserOpenned", false);
+
+  watch: {
+    isUserOpenned() {
+      this.needRenderChart = !this.isUserOpenned;
     },
-    makeChart() {
-      const сhartData = {
+  },
+  computed: {
+    chartData() {
+      return {
         labels: this.legend.map((legendItem) => legendItem.text),
         datasets: [
           {
@@ -120,15 +132,14 @@ export default {
           },
         ],
       };
-
-      const options = {
-        borderWidth: "10px",
-        legend: {
-          display: false,
-        },
-      };
-
-      this.$refs.chart.renderChart(сhartData, options);
+    },
+  },
+  methods: {
+    closeProfile() {
+      this.$emit("setUserOpenned", false);
+    },
+    makeChart() {
+      this.$refs?.chart?.renderChart(this.chartData, CHART_OPTIONS);
     },
   },
 };
